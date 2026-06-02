@@ -1,0 +1,8 @@
+{
+  $lookup: {
+    from: "services",        // Which collection to look in?
+    localField: "serviceId", // Which field in Bookings has the ID?
+    foreignField: "_id",     // Which field in Services matches?
+    as: "serviceDetails"     // Where to put the result?
+  }
+}

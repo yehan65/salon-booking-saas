@@ -1,0 +1,62 @@
+# ============ DEPENDENCIES ============
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ============ ENVIRONMENT FILES ============
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# ============ BUILD OUTPUTS ============
+dist/
+build/
+.next/
+out/
+storybook-static/
+
+# ============ BACKEND SPECIFIC ============
+backend/node_modules/
+backend/.env
+backend/package-lock.json
+
+# ============ FRONTEND SPECIFIC ============
+frontend/node_modules/
+frontend/.env
+frontend/build/
+frontend/package-lock.json
+
+# ============ IDE FILES ============
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# ============ OS FILES ============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============ LOGS ============
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============ TESTING ============
+coverage/
+.nyc_output/
+.cypress-cache/
+
+# ============ MISC ============
+*.tmp
+*.temp
+.cache/
+.env.local

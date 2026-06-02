@@ -1,0 +1,115 @@
+LEGEND:
+[====] = Existing booking
+[----] = New slot
+═══   = Overlap area
+
+─────────────────────────────────────────────────────────────────────────────
+
+SCENARIO 1: NO OVERLAP (New is completely BEFORE)
+─────────────────────────────────────────────────────────────────────────────
+Time:    1:00    1:30    2:00    2:30    3:00
+         |-------|-------|-------|-------|
+EXISTING:                 [=============]
+                          2:00 ─── 3:00
+NEW:      [-----]
+          1:00 ─ 1:30
+
+Check 1: currentTime (1:00) < bookingEnd (3:00)?  ✅ TRUE
+Check 2: slotEnd (1:30) > bookingStart (2:00)?     ❌ FALSE (1:30 > 2:00? NO)
+
+Result: NOT BOTH TRUE → NO OVERLAP ✅
+
+─────────────────────────────────────────────────────────────────────────────
+
+SCENARIO 2: NO OVERLAP (New is completely AFTER)
+─────────────────────────────────────────────────────────────────────────────
+Time:    1:00    1:30    2:00    2:30    3:00
+         |-------|-------|-------|-------|
+EXISTING: [=============]
+          1:00 ─── 2:00
+NEW:                       [-----]
+                           2:30 ─ 3:00
+
+Check 1: currentTime (2:30) < bookingEnd (2:00)?  ❌ FALSE (2:30 < 2:00? NO)
+Check 2: slotEnd (3:00) > bookingStart (1:00)?     ✅ TRUE
+
+Result: NOT BOTH TRUE → NO OVERLAP ✅
+
+─────────────────────────────────────────────────────────────────────────────
+
+SCENARIO 3: OVERLAP (New starts DURING existing)
+─────────────────────────────────────────────────────────────────────────────
+Time:    1:00    1:30    2:00    2:30    3:00
+         |-------|-------|-------|-------|
+EXISTING:           [=============]
+                    1:30 ─── 3:00
+NEW:                     [-----]
+                         2:00 ─ 2:30
+
+Check 1: currentTime (2:00) < bookingEnd (3:00)?  ✅ TRUE
+Check 2: slotEnd (2:30) > bookingStart (1:30)?     ✅ TRUE (2:30 > 1:30? YES)
+
+Result: BOTH TRUE → OVERLAP! ❌
+        ═══ Overlap area: 2:00-2:30
+
+─────────────────────────────────────────────────────────────────────────────
+
+SCENARIO 4: OVERLAP (New ends DURING existing)
+─────────────────────────────────────────────────────────────────────────────
+Time:    1:00    1:30    2:00    2:30    3:00
+         |-------|-------|-------|-------|
+EXISTING:     [=============]
+              1:30 ─── 3:00
+NEW:      [-----]
+          1:00 ─ 2:00
+
+Check 1: currentTime (1:00) < bookingEnd (3:00)?  ✅ TRUE
+Check 2: slotEnd (2:00) > bookingStart (1:30)?     ✅ TRUE (2:00 > 1:30? YES)
+
+Result: BOTH TRUE → OVERLAP! ❌
+        ═══ Overlap area: 1:30-2:00
+
+─────────────────────────────────────────────────────────────────────────────
+
+SCENARIO 5: OVERLAP (New completely INSIDE existing)
+─────────────────────────────────────────────────────────────────────────────
+Time:    1:00    1:30    2:00    2:30    3:00
+         |-------|-------|-------|-------|
+EXISTING: [=====================]
+          1:00 ─────────── 3:00
+NEW:           [-----]
+               1:30 ─ 2:30
+
+Check 1: currentTime (1:30) < bookingEnd (3:00)?  ✅ TRUE
+Check 2: slotEnd (2:30) > bookingStart (1:00)?     ✅ TRUE (2:30 > 1:00? YES)
+
+Result: BOTH TRUE → OVERLAP! ❌
+        ═══ Overlap area: 1:30-2:30 (entire new slot)
+
+─────────────────────────────────────────────────────────────────────────────
+
+SCENARIO 6: OVERLAP (Existing completely INSIDE new)
+─────────────────────────────────────────────────────────────────────────────
+Time:    1:00    1:30    2:00    2:30    3:00
+         |-------|-------|-------|-------|
+EXISTING:     [=====]
+              1:30 ─ 2:30
+NEW:      [=============]
+          1:00 ─────── 3:00
+
+Check 1: currentTime (1:00) < bookingEnd (2:30)?  ✅ TRUE
+Check 2: slotEnd (3:00) > bookingStart (1:30)?     ✅ TRUE (3:00 > 1:30? YES)
+
+Result: BOTH TRUE → OVERLAP! ❌
+        ═══ Overlap area: 1:30-2:30 (entire existing booking)
+
+
+
+The Code in English
+
+if (newStart < existingEnd && newEnd > existingStart) {
+   (If the new slot starts BEFORE the existing slot ends
+   AND the new slot ends AFTER the existing slot starts
+   Then they MUST overlap!)
+  isAvailable = false;
+}
