@@ -27,8 +27,8 @@ class UserController {
       }
 
       // Generate email verification token
-      const verificationToken = crypto.randomBytes(32).toString("hex");
-      const verificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+      // const verificationToken = crypto.randomBytes(32).toString("hex");
+      // const verificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
       // Create user
       const user = new User({
@@ -37,23 +37,23 @@ class UserController {
         password,
         phone,
         role: role || "customer",
-        isEmailVerified: false,
+        isEmailVerified: true,
         emailVerificationToken: verificationToken,
         emailVerificationExpires: verificationExpires,
       });
 
-      const verificationURL = `${process.env.FRONTEND_URL}/user/auth/verify-email/${user.emailVerificationToken}`;
+      // const verificationURL = `${process.env.FRONTEND_URL}/user/auth/verify-email/${user.emailVerificationToken}`;
 
-      const emailHTML = getVerificationEmailTemplate(
-        user.name,
-        verificationURL,
-      );
+      // const emailHTML = getVerificationEmailTemplate(
+      //   user.name,
+      //   verificationURL,
+      // );
 
-      await sendEmail({
-        email: user.email,
-        subject: "Verify Your Email - SalonBooking",
-        html: emailHTML,
-      });
+      // await sendEmail({
+      //   email: user.email,
+      //   subject: "Verify Your Email - SalonBooking",
+      //   html: emailHTML,
+      // });
 
       // Generate token for auto-login
       const token = user.generateAuthToken();
@@ -61,14 +61,13 @@ class UserController {
       await user.save();
       res.status(201).json({
         success: true,
-        message:
-          "Registration successful! Please check your email to verify your account.",
+        message: "Registration successful! ",
         data: {
           id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
-          isEmailVerified: false,
+          isEmailVerified: true,
           token,
         },
       });
