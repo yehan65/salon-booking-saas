@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "proxy": "https://salon-booking-saas-api.onrender.com",
   "dependencies": {
     "axios": "^1.16.1",
     "react": "^19.2.6",
