@@ -38,8 +38,8 @@ class UserController {
         phone,
         role: role || "customer",
         isEmailVerified: true,
-        emailVerificationToken: verificationToken,
-        emailVerificationExpires: verificationExpires,
+        // emailVerificationToken: verificationToken,
+        // emailVerificationExpires: verificationExpires,
       });
 
       // const verificationURL = `${process.env.FRONTEND_URL}/user/auth/verify-email/${user.emailVerificationToken}`;

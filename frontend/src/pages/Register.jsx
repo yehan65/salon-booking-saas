@@ -38,7 +38,7 @@ export default function Register() {
       }, 2000);
     } catch (error) {
       console.error(error.message);
-      toast.success(`Error creating account: ${error.message}`);
+      toast.error(`Error creating account: ${error.message}`);
     } finally {
       setLoading(false);
     }
