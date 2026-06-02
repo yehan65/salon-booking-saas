@@ -26,8 +26,6 @@ server.listen(PORT, () => {
   console.log(`Server is UP and RUNNING on PORT ${PORT}...`);
 });
 
-// Gp6dbfjNHYvGQcjh
-
 // mongoose.connect(process.env.MONGODB_URI)
 //   .then(() => {
 //     console.log('✅ MongoDB connected successfully');
