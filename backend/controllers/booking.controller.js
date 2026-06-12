@@ -1,5 +1,7 @@
 // backend/controllers/bookingController.js
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 const Booking = require("../models/booking.model");
 const Service = require("../models/service.model");
 const Staff = require("../models/staff.model");
@@ -21,12 +23,10 @@ class BookingController {
           .json({ success: false, message: "Oops, something went wrong." });
 
       if (!user.isEmailVerified) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "You must verify your email to place a booking",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "You must verify your email to place a booking",
+        });
       }
 
       // 1. Get service details
@@ -84,39 +84,59 @@ class BookingController {
       // 5. Calculate payment amounts (25% deposit)
       const totalPrice = service.price;
       const depositAmount = totalPrice * 0.25;
-      const remainingAmount = totalPrice - depositAmount;
+      // const remainingAmount = totalPrice - depositAmount;
 
       // 6. Create booking
-      const booking = new Booking({
-        customerId,
-        staffId,
-        serviceId,
-        date: bookingDate,
-        duration: service.duration,
-        totalPrice,
-        depositAmount,
-        remainingAmount,
-        status: "confirmed",
-        paymentStatus: "deposit_paid",
-        customerNotes,
+      // const booking = new Booking({
+      //   customerId,
+      //   staffId,
+      //   serviceId,
+      //   date: bookingDate,
+      //   duration: service.duration,
+      //   totalPrice,
+      //   depositAmount,
+      //   remainingAmount,
+      //   status: "pending",
+      //   paymentStatus: "unpaid",
+      //   customerNotes,
+      // });
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: "usd",
+        amount: Math.round(depositAmount * 100),
+        metadata: {
+          // bookingId: booking._id.toString(),
+          customerId: customerId.toString(),
+          staffId: staffId,
+          serviceId: serviceId,
+          date: date,
+          customerNotes: customerNotes || "",
+          servicePrice: service.price.toString(),
+          serviceDuration: service.duration.toString(),
+          serviceName: service.name,
+        },
       });
 
       // 7. Populate response
-      const populatedBooking = await Booking.findById(booking._id)
-        .populate("customerId", "name email phone")
-        .populate("staffId", "name")
-        .populate("serviceId", "name duration price");
+      // const populatedBooking = await Booking.findById(booking._id)
+      //   .populate("customerId", "name email phone")
+      //   .populate("staffId", "name")
+      //   .populate("serviceId", "name duration price");
 
-      await booking.save();
-
-      res.status(201).json({
+      //   await booking.save();
+      // if (paymentIntent.status === "succeeded") {
+      //   booking.paymentIntentId = paymentIntent.id;
+      // }
+      return res.status(201).json({
         success: true,
-        message: "Booking created successfully!",
-        data: populatedBooking,
+        // message: "Booking created successfully!",
+        // data: populatedBooking,
+        depositAmount: depositAmount,
+        clientSecret: paymentIntent.client_secret,
       });
     } catch (error) {
       console.error("Booking error:", error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: error.message,
       });

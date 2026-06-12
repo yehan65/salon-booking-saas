@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
+import { loadStripe } from "@stripe/stripe-js";
+import PaymentForm from "../components/PaymentForm";
+import { Elements } from "@stripe/react-stripe-js";
 
 export default function Booking() {
   const { serviceID } = useParams();
@@ -16,6 +19,12 @@ export default function Booking() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const [showPayment, setShowPayment] = useState(false);
+  const [bookingId, setBookingId] = useState(null);
+  const [depositAmount, setDepositAmount] = useState(0);
+  const [clientSecret, setClientSecret] = useState(null);
+
+  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
   useEffect(() => {
     fetchServices();
@@ -95,10 +104,18 @@ export default function Booking() {
         customerNotes: "",
       };
 
-      const response = await api.post("/bookings/new", bookingData);
+      // const response = await api.post("/bookings/new", bookingData);
+      const response = await api.post(
+        "/bookings/create-payment-intent",
+        bookingData,
+      );
       if (response.data.success) {
-        toast.success("Booking confirmed");
-        navigate("/my-bookings");
+        console.log(response.data.data);
+        // setBookingId(response.data.data.bookingId);
+        setDepositAmount(response.data.depositAmount);
+        setClientSecret(response.data.clientSecret);
+        setStep(4);
+        setShowPayment(true);
       }
     } catch (error) {
       console.error("Booking error:", error);
@@ -120,6 +137,8 @@ export default function Booking() {
     }
     return dates;
   }
+
+  // console.log("Selected Services: ", selectedService);
 
   if (step === 1) {
     return (
@@ -279,6 +298,9 @@ export default function Booking() {
           {selectedSlot && (
             <button
               style={styles.confirmBtn}
+              // onClick={() => {
+              //   (setStep(4), setShowPayment(true));
+              // }}
               onClick={handleBooking}
               disabled={loading}
             >
@@ -286,6 +308,44 @@ export default function Booking() {
             </button>
           )}
         </div>
+      </div>
+    );
+  }
+
+  // console.log(showPayment);
+
+  // showPayment === true && alert("Showing payment option");
+
+  if (step === 4) {
+    return (
+      <div style={styles.paymentContainer}>
+        <h3>Complete Payment</h3>
+        <p>Pay 25% deposit to confirm your booking</p>
+        <p>Amount: ${selectedService.price * 0.25}</p>
+
+        <Elements stripe={stripePromise}>
+          <PaymentForm
+            amount={selectedService.price * 0.25}
+            // bookingId={bookingId}
+            clientSecret={clientSecret}
+            onSuccess={() => {
+              // handleBooking();
+              setShowPayment(false);
+              alert("Booking confirmed! Check your email.");
+              navigate("/my-bookings");
+            }}
+            onError={(error) => alert(error)}
+          />
+        </Elements>
+
+        <button
+          onClick={() => {
+            (setShowPayment(false), setStep(3));
+          }}
+          style={styles.cancelBtn}
+        >
+          Cancel
+        </button>
       </div>
     );
   }
@@ -418,5 +478,19 @@ const styles = {
     backgroundColor: "#f8f9fa",
     borderRadius: "8px",
     color: "#7f8c8d",
+  },
+  paymentContainer: {
+    margin: "10px",
+  },
+  cancelBtn: {
+    padding: "0.75rem",
+    backgroundColor: "red",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    width: "100%",
+    fontSize: "1rem",
+    fontWeight: "600",
   },
 };

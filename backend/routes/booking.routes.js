@@ -18,8 +18,14 @@ bookingRouter.get(
   roleVerify("customer", "admin"),
   bookingController.httpGetBookingById,
 );
+// bookingRouter.post(
+//   "/new",
+//   authVerify,
+//   roleVerify("customer"),
+//   bookingController.httpCreateBooking,
+// );
 bookingRouter.post(
-  "/new",
+  "/create-payment-intent",
   authVerify,
   roleVerify("customer"),
   bookingController.httpCreateBooking,

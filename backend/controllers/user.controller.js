@@ -8,6 +8,7 @@ const {
   sendEmail,
   getVerificationEmailTemplate,
 } = require("../utils/sendEmail");
+const Booking = require("../models/booking.model");
 
 class UserController {
   // @desc    Register user
@@ -263,6 +264,61 @@ class UserController {
         success: false,
         message: error.message,
       });
+    }
+  }
+
+  async httpGetPopularServices(req, res) {
+    try {
+      const popularServices = await Booking.aggregate([
+        { $group: { _id: "$serviceId", count: { $sum: 1 } } },
+        {
+          $project: {
+            serviceId: "$_id",
+            count: 1,
+            _id: 0,
+          },
+        },
+        {
+          $sort: { count: -1 },
+        },
+        {
+          $limit: 3,
+        },
+        {
+          $lookup: {
+            from: "services",
+            localField: "serviceId",
+            foreignField: "_id",
+            as: "service",
+          },
+        },
+        {
+          $unwind: "$service",
+        },
+      ]);
+
+      if (!popularServices) {
+        return res.status(400).json({ success: false, message: "No services" });
+      }
+
+      const formattingPopularServices = popularServices.map((item) => ({
+        _id: item.service._id,
+        name: item.service.name,
+        duration: item.service.duration,
+        price: item.service.price,
+        description: item.service.description,
+        category: item.service.category,
+      }));
+
+      return res.status(200).json({
+        success: true,
+        message: "Popular Services",
+        data: formattingPopularServices,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ success: false, message: `SERVER ERROR: ${error}` });
     }
   }
 }

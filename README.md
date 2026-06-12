@@ -21,6 +21,51 @@ A complete salon management system with customer booking portal and admin dashbo
 - ✅ Update booking status
 - 📧 Email notifications
 
+### 💳 Payment Integration
+
+- 25% deposit required at booking
+- Secure Stripe payment processing
+- Automatic booking confirmation after payment
+- Webhook handling for payment status
+
+### 📱 Fully Responsive
+
+- Mobile-friendly navigation
+- Responsive design for all devices
+- Touch-optimized interface
+- Smooth animations
+
+## 🚀 Live Demo
+
+Try it here: https://salon-booking-saas-kappa.vercel.app
+
+### Test Payment Card:
+
+- Card: `4242 4242 4242 4242`
+- Expiry: `12/34`
+- CVC: `123`
+
+### Demo Accounts:
+
+**Customer Login:**
+
+- Email: test1@gmail.com
+- Password: 123456
+
+**Admin Login:**
+
+- Email: yehan@gmail.com
+- Password: 123456
+
+⚠️ Note: Webhook is configured for production. Payments are test mode only.
+
+## Recent Updates (June 2026)
+
+- ✅ Stripe payment integration
+- ✅ Mobile responsive design
+- ✅ Webhook payment confirmation
+- ✅ Booking only after successful payment
+
 ## Tech Stack
 
 - **Frontend:** React.js, Context API, Axios

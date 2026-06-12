@@ -1,6 +1,8 @@
-import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/Auth";
+import api from "../services/api";
+import toast from "react-hot-toast";
 
 export default function Home() {
   const { isAuthenticated, user } = useContext(AuthContext);
@@ -90,7 +92,48 @@ function AdminHome() {
 // Customer Homepage
 function CustomerHome() {
   const { user } = useContext(AuthContext);
+  const [popularServices, setPopularServices] = useState([]);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchPopularServices();
+  }, []);
+
+  async function fetchPopularServices() {
+    try {
+      const response = await api.get("/user/services/popular");
+      setPopularServices(response.data?.data);
+    } catch (error) {
+      console.error(error.message);
+      toast.error("Cannot display popular services at the moment!");
+    }
+  }
+
+  function displayEmoji(category, keyword) {
+    const safetyCategory = category || "";
+    const safeKeyword = (keyword || "").toLowerCase();
+    switch (true) {
+      case safetyCategory === "Hair":
+        return "✂️";
+      case safetyCategory === "Nails":
+        return "💅";
+      case safetyCategory === "Massage" && safeKeyword.includes("women"):
+        return "💆‍♀️";
+      case safetyCategory === "Massage" && safeKeyword.includes("men"):
+        return "💆‍♂️";
+      case safetyCategory === "Facial":
+        return "🧴😀";
+      case safetyCategory === "Makeup":
+        return "💄";
+      case safetyCategory === "Waxing":
+        return "🪒";
+      case safetyCategory === "Hair Color":
+        return "🎨";
+      default:
+        return "📃";
+    }
+  }
 
   return (
     <div style={styles.container}>
@@ -133,21 +176,28 @@ function CustomerHome() {
       <div style={styles.section}>
         <h2 style={styles.sectionTitle}>Popular Services</h2>
         <div style={styles.servicesGrid}>
-          <div style={styles.serviceCard}>
-            <h3>✂️ Haircut</h3>
-            <p>Professional cut and style</p>
-            <small>30 min - Starting at $45</small>
-          </div>
-          <div style={styles.serviceCard}>
-            <h3>🎨 Hair Color</h3>
-            <p>Full color or highlights</p>
-            <small>90 min - Starting at $120</small>
-          </div>
-          <div style={styles.serviceCard}>
-            <h3>💆 Massage</h3>
-            <p>Relaxing full body massage</p>
-            <small>60 min - Starting at $80</small>
-          </div>
+          {popularServices.map((service) => {
+            return (
+              <div
+                key={service._id}
+                style={{
+                  ...styles.serviceCard,
+                  ...(hoveredCard === service._id ? styles.statCardHover : {}),
+                }}
+                onMouseEnter={() => setHoveredCard(service._id)}
+                onMouseLeave={() => setHoveredCard(null)}
+                onClick={() => navigate(`/booking/${service._id}`)}
+              >
+                <h3>
+                  {displayEmoji(service.category, service.name)} {service.name}
+                </h3>
+                <p>{service.description}</p>
+                <small>
+                  {service.duration} min - Starting at ${service.price}
+                </small>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -534,7 +584,7 @@ const styles = {
   sectionTitle: {
     fontSize: "1.5rem",
     marginBottom: "1rem",
-    color: "#ffffff",
+    color: "dodgerblue",
     position: "relative",
     display: "inline-block",
     "&:after": {
@@ -561,6 +611,7 @@ const styles = {
     transition: "transform 0.3s",
     textAlign: "center",
     color: "#ffffff",
+    cursor: "pointer",
     border: "1px solid rgba(255,255,255,0.1)",
     "&:hover": {
       transform: "translateY(-5px)",

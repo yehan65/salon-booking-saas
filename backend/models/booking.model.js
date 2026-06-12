@@ -48,6 +48,11 @@ const bookingSchema = new mongoose.Schema(
       enum: ["unpaid", "deposit_paid", "fully_paid", "refunded"],
       default: "unpaid",
     },
+    paymentIntentId: {
+      type: String,
+      default: null,
+      index: true,
+    },
     customerNotes: {
       type: String,
       maxlength: 500,
@@ -79,6 +84,7 @@ bookingSchema.index({ serviceId: 1 });
 bookingSchema.index({ date: 1 });
 bookingSchema.index({ status: 1 });
 bookingSchema.index({ date: 1, staffId: 1 }); // Compound index for availability
+bookingSchema.index({ paymentIntentId: 1 });
 
 // Update updatedAt on save
 bookingSchema.pre("save", function () {

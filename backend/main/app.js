@@ -9,6 +9,8 @@ const adminRouter = require("../routes/admin.routes");
 const bookingRouter = require("../routes/booking.routes");
 const availabilityRouter = require("../routes/availability.routes");
 const publicRouter = require("../routes/public.routes");
+const webhookRouter = require("../routes/webhook.routes");
+
 require("dotenv").config();
 
 const app = express();
@@ -37,6 +39,9 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use("/webhooks", webhookRouter);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
